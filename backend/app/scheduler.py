@@ -13,8 +13,8 @@ from app.alerting import check_and_alert
 
 logger = logging.getLogger("panopticon.scheduler")
 
-_scheduler: BackgroundScheduler | None = None
-_last_heartbeat: datetime | None = None
+_scheduler = None  # type: Optional[BackgroundScheduler]
+_last_heartbeat = None  # type: Optional[datetime]
 
 
 def get_scheduler_status() -> tuple[bool, datetime | None]:

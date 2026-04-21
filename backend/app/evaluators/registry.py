@@ -8,12 +8,14 @@ from app.evaluators.inactive_users import InactiveUsersEvaluator
 from app.evaluators.branch_protection import BranchProtectionEvaluator
 from app.evaluators.no_direct_push import NoDirectPushEvaluator
 from app.evaluators.audit_logging import AuditLoggingEvaluator
-from app.connectors.base import ConnectorBase, MockConnector
+from app.connectors.base import ConnectorBase, MockConnector, get_registered_connectors
 from app.config import settings
+
+# Ensure all connectors are imported and registered
+import app.connectors  # noqa: F401
 
 logger = logging.getLogger("panopticon.registry")
 
-# Maps evaluator_type string -> evaluator class
 EVALUATOR_REGISTRY: dict[str, type[EvaluatorBase]] = {
     "mfa_enforced": MfaEnforcedEvaluator,
     "no_inactive_users": InactiveUsersEvaluator,
@@ -31,49 +33,24 @@ def get_evaluator(evaluator_type: str) -> EvaluatorBase:
 
 
 def get_connector(connector_type: str) -> ConnectorBase:
-    """Return a real connector if credentials are configured, otherwise mock."""
-    if connector_type == "okta" and settings.okta_domain and settings.okta_api_token:
-        from app.connectors.okta import OktaConnector
-        return OktaConnector()
+    """Return a real connector if credentials are configured, otherwise mock.
 
-    if connector_type == "github" and settings.github_token:
-        from app.connectors.github import GitHubConnector
-        return GitHubConnector()
+    Connectors self-register via @register_connector. Each declares its
+    required_env fields — if all are set in Settings, the real connector
+    is used. Otherwise falls back to the connector's mock_data.
+    """
+    registry = get_registered_connectors()
+    cls = registry.get(connector_type)
 
-    if connector_type == "aws" and settings.aws_access_key_id:
-        from app.connectors.aws import AWSConnector
-        return AWSConnector()
+    if cls is None:
+        logger.warning(f"No connector registered for type '{connector_type}', using empty mock")
+        return MockConnector({})
+
+    # Check if required credentials are configured
+    if cls.required_env:
+        all_configured = all(getattr(settings, env_key, None) for env_key in cls.required_env)
+        if all_configured:
+            return cls()
 
     logger.info(f"No credentials for {connector_type}, using mock connector")
-    return MockConnector(_get_mock_data(connector_type))
-
-
-def _get_mock_data(connector_type: str) -> dict:
-    """Return realistic mock data for development."""
-    if connector_type == "okta":
-        return {
-            "users": [
-                {"id": "u1", "email": "alice@example.com", "status": "ACTIVE", "mfa_enrolled": True, "mfa_factors": ["okta_verify"], "last_login": "2026-04-18T10:00:00Z"},
-                {"id": "u2", "email": "bob@example.com", "status": "ACTIVE", "mfa_enrolled": True, "mfa_factors": ["okta_verify", "sms"], "last_login": "2026-04-15T14:30:00Z"},
-                {"id": "u3", "email": "charlie@example.com", "status": "ACTIVE", "mfa_enrolled": False, "mfa_factors": [], "last_login": "2026-03-01T09:00:00Z"},
-                {"id": "u4", "email": "dana@example.com", "status": "ACTIVE", "mfa_enrolled": True, "mfa_factors": ["webauthn"], "last_login": "2026-04-19T16:00:00Z"},
-                {"id": "u5", "email": "eve@example.com", "status": "DEPROVISIONED", "mfa_enrolled": False, "mfa_factors": [], "last_login": "2025-12-01T08:00:00Z"},
-                {"id": "u6", "email": "frank@example.com", "status": "ACTIVE", "mfa_enrolled": False, "mfa_factors": [], "last_login": "2026-01-10T11:00:00Z"},
-            ]
-        }
-    if connector_type == "github":
-        return {
-            "repos": [
-                {"full_name": "org/api-service", "default_branch": "main", "branch_protection": {"enabled": True, "required_reviews": 1, "enforce_admins": True, "restrict_pushes": True, "dismiss_stale_reviews": True, "required_status_checks": True, "require_linear_history": False}},
-                {"full_name": "org/web-app", "default_branch": "main", "branch_protection": {"enabled": True, "required_reviews": 2, "enforce_admins": False, "restrict_pushes": False, "dismiss_stale_reviews": False, "required_status_checks": True, "require_linear_history": False}},
-                {"full_name": "org/infra-config", "default_branch": "main", "branch_protection": None},
-            ]
-        }
-    if connector_type == "aws":
-        return {
-            "accounts": [
-                {"account_id": "123456789012", "account_name": "prod-us", "cloudtrail_enabled": True, "is_logging": True, "trail_name": "org-trail"},
-                {"account_id": "234567890123", "account_name": "prod-eu", "cloudtrail_enabled": True, "is_logging": True, "trail_name": "org-trail"},
-            ]
-        }
-    return {}
+    return MockConnector(cls.mock_data)

@@ -5,17 +5,31 @@ import logging
 import httpx
 
 from app.config import settings
-from app.connectors.base import ConnectorBase
+from app.connectors.base import ConnectorBase, register_connector
 
 logger = logging.getLogger("panopticon.connectors.okta")
 
 
+@register_connector
 class OktaConnector(ConnectorBase):
     """Fetches user and MFA data from Okta Admin API.
 
     Requires OKTA_DOMAIN and OKTA_API_TOKEN environment variables.
     Returns normalized user list with MFA enrollment status.
     """
+
+    connector_type = "okta"
+    required_env = ["okta_domain", "okta_api_token"]
+    mock_data = {
+        "users": [
+            {"id": "u1", "email": "alice@example.com", "status": "ACTIVE", "mfa_enrolled": True, "mfa_factors": ["okta_verify"], "last_login": "2026-04-18T10:00:00Z"},
+            {"id": "u2", "email": "bob@example.com", "status": "ACTIVE", "mfa_enrolled": True, "mfa_factors": ["okta_verify", "sms"], "last_login": "2026-04-15T14:30:00Z"},
+            {"id": "u3", "email": "charlie@example.com", "status": "ACTIVE", "mfa_enrolled": False, "mfa_factors": [], "last_login": "2026-03-01T09:00:00Z"},
+            {"id": "u4", "email": "dana@example.com", "status": "ACTIVE", "mfa_enrolled": True, "mfa_factors": ["webauthn"], "last_login": "2026-04-19T16:00:00Z"},
+            {"id": "u5", "email": "eve@example.com", "status": "DEPROVISIONED", "mfa_enrolled": False, "mfa_factors": [], "last_login": "2025-12-01T08:00:00Z"},
+            {"id": "u6", "email": "frank@example.com", "status": "ACTIVE", "mfa_enrolled": False, "mfa_factors": [], "last_login": "2026-01-10T11:00:00Z"},
+        ]
+    }
 
     def __init__(self):
         self.base_url = f"https://{settings.okta_domain}"

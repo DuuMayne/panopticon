@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Optional, List
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -8,9 +9,9 @@ from pydantic import BaseModel
 
 class ControlCurrentStateSchema(BaseModel):
     current_status: str
-    last_run_at: datetime | None = None
-    first_failed_at: datetime | None = None
-    last_status_changed_at: datetime | None = None
+    last_run_at: Optional[datetime] = None
+    first_failed_at: Optional[datetime] = None
+    last_status_changed_at: Optional[datetime] = None
     consecutive_failures: int = 0
     failing_resource_count: int = 0
 
@@ -21,12 +22,12 @@ class ControlSummary(BaseModel):
     id: UUID
     key: str
     name: str
-    description: str | None = None
-    owner: str | None = None
+    description: Optional[str] = None
+    owner: Optional[str] = None
     enabled: bool
     connector_type: str
     evaluator_type: str
-    current_state: ControlCurrentStateSchema | None = None
+    current_state: Optional[ControlCurrentStateSchema] = None
 
     model_config = {"from_attributes": True}
 
@@ -42,7 +43,7 @@ class FailureSchema(BaseModel):
     id: UUID
     resource_type: str
     resource_identifier: str
-    details_json: dict | None = None
+    details_json: Optional[dict] = None
 
     model_config = {"from_attributes": True}
 
@@ -51,18 +52,18 @@ class RunSummary(BaseModel):
     id: UUID
     control_id: UUID
     started_at: datetime
-    completed_at: datetime | None = None
+    completed_at: Optional[datetime] = None
     status: str
-    summary: str | None = None
-    error_message: str | None = None
+    summary: Optional[str] = None
+    error_message: Optional[str] = None
 
     model_config = {"from_attributes": True}
 
 
 class RunDetail(RunSummary):
-    evidence_json: dict | None = None
-    run_metadata_json: dict | None = None
-    failures: list[FailureSchema] = []
+    evidence_json: Optional[dict] = None
+    run_metadata_json: Optional[dict] = None
+    failures: List[FailureSchema] = []
 
 
 class FailureWithControl(FailureSchema):
@@ -76,4 +77,4 @@ class FailureWithControl(FailureSchema):
 class HealthResponse(BaseModel):
     status: str
     scheduler_running: bool
-    last_scheduler_heartbeat: datetime | None = None
+    last_scheduler_heartbeat: Optional[datetime] = None

@@ -5,17 +5,28 @@ import logging
 import httpx
 
 from app.config import settings
-from app.connectors.base import ConnectorBase
+from app.connectors.base import ConnectorBase, register_connector
 
 logger = logging.getLogger("panopticon.connectors.github")
 
 
+@register_connector
 class GitHubConnector(ConnectorBase):
     """Fetches branch protection settings from GitHub REST API.
 
     Requires GITHUB_TOKEN environment variable.
     Reads critical_repos list from control config_json.
     """
+
+    connector_type = "github"
+    required_env = ["github_token"]
+    mock_data = {
+        "repos": [
+            {"full_name": "org/api-service", "default_branch": "main", "branch_protection": {"enabled": True, "required_reviews": 1, "enforce_admins": True, "restrict_pushes": True, "dismiss_stale_reviews": True, "required_status_checks": True, "require_linear_history": False}},
+            {"full_name": "org/web-app", "default_branch": "main", "branch_protection": {"enabled": True, "required_reviews": 2, "enforce_admins": False, "restrict_pushes": False, "dismiss_stale_reviews": False, "required_status_checks": True, "require_linear_history": False}},
+            {"full_name": "org/infra-config", "default_branch": "main", "branch_protection": None},
+        ]
+    }
 
     BASE_URL = "https://api.github.com"
 

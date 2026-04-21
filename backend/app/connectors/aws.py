@@ -6,11 +6,12 @@ import boto3
 from botocore.exceptions import ClientError, NoCredentialsError
 
 from app.config import settings
-from app.connectors.base import ConnectorBase
+from app.connectors.base import ConnectorBase, register_connector
 
 logger = logging.getLogger("panopticon.connectors.aws")
 
 
+@register_connector
 class AWSConnector(ConnectorBase):
     """Fetches CloudTrail status from AWS accounts.
 
@@ -29,6 +30,15 @@ class AWSConnector(ConnectorBase):
         "production_accounts": ["123456789012", "234567890123"]
     }
     """
+
+    connector_type = "aws"
+    required_env = ["aws_access_key_id"]
+    mock_data = {
+        "accounts": [
+            {"account_id": "123456789012", "account_name": "prod-us", "cloudtrail_enabled": True, "is_logging": True, "trail_name": "org-trail"},
+            {"account_id": "234567890123", "account_name": "prod-eu", "cloudtrail_enabled": True, "is_logging": True, "trail_name": "org-trail"},
+        ]
+    }
 
     def test_connection(self) -> bool:
         try:
