@@ -8,6 +8,11 @@ from app.evaluators.inactive_users import InactiveUsersEvaluator
 from app.evaluators.branch_protection import BranchProtectionEvaluator
 from app.evaluators.no_direct_push import NoDirectPushEvaluator
 from app.evaluators.audit_logging import AuditLoggingEvaluator
+from app.evaluators.root_mfa import RootMfaEvaluator
+from app.evaluators.no_stale_access_keys import NoStaleAccessKeysEvaluator
+from app.evaluators.encryption_at_rest import EncryptionAtRestEvaluator
+from app.evaluators.no_public_s3 import NoPublicS3Evaluator
+from app.evaluators.secret_scanning import SecretScanningEvaluator
 from app.connectors.base import ConnectorBase, MockConnector, get_registered_connectors
 from app.config import settings
 
@@ -22,6 +27,11 @@ EVALUATOR_REGISTRY: dict[str, type[EvaluatorBase]] = {
     "branch_protection": BranchProtectionEvaluator,
     "no_direct_push": NoDirectPushEvaluator,
     "audit_logging": AuditLoggingEvaluator,
+    "root_mfa_enabled": RootMfaEvaluator,
+    "no_stale_access_keys": NoStaleAccessKeysEvaluator,
+    "encryption_at_rest": EncryptionAtRestEvaluator,
+    "no_public_s3": NoPublicS3Evaluator,
+    "secret_scanning_enabled": SecretScanningEvaluator,
 }
 
 

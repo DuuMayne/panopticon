@@ -22,9 +22,9 @@ class GitHubConnector(ConnectorBase):
     required_env = ["github_token"]
     mock_data = {
         "repos": [
-            {"full_name": "org/api-service", "default_branch": "main", "branch_protection": {"enabled": True, "required_reviews": 1, "enforce_admins": True, "restrict_pushes": True, "dismiss_stale_reviews": True, "required_status_checks": True, "require_linear_history": False}},
-            {"full_name": "org/web-app", "default_branch": "main", "branch_protection": {"enabled": True, "required_reviews": 2, "enforce_admins": False, "restrict_pushes": False, "dismiss_stale_reviews": False, "required_status_checks": True, "require_linear_history": False}},
-            {"full_name": "org/infra-config", "default_branch": "main", "branch_protection": None},
+            {"full_name": "org/api-service", "default_branch": "main", "branch_protection": {"enabled": True, "required_reviews": 1, "enforce_admins": True, "restrict_pushes": True, "dismiss_stale_reviews": True, "required_status_checks": True, "require_linear_history": False}, "security_settings": {"secret_scanning": True, "secret_scanning_push_protection": True}},
+            {"full_name": "org/web-app", "default_branch": "main", "branch_protection": {"enabled": True, "required_reviews": 2, "enforce_admins": False, "restrict_pushes": False, "dismiss_stale_reviews": False, "required_status_checks": True, "require_linear_history": False}, "security_settings": {"secret_scanning": True, "secret_scanning_push_protection": False}},
+            {"full_name": "org/infra-config", "default_branch": "main", "branch_protection": None, "security_settings": {"secret_scanning": False, "secret_scanning_push_protection": False}},
         ]
     }
 
@@ -58,9 +58,10 @@ class GitHubConnector(ConnectorBase):
         repos = []
         for repo_full_name in critical_repos:
             repo_data = self._fetch_repo_protection(repo_full_name)
+            repo_data["security_settings"] = self._fetch_security_settings(repo_full_name)
             repos.append(repo_data)
 
-        logger.info(f"Fetched protection data for {len(repos)} repos")
+        logger.info(f"Fetched protection and security data for {len(repos)} repos")
         return {"repos": repos}
 
     def _fetch_repo_protection(self, repo_full_name: str) -> dict:
@@ -141,3 +142,22 @@ class GitHubConnector(ConnectorBase):
                 "branch_protection": None,
                 "error": str(e),
             }
+
+    def _fetch_security_settings(self, repo_full_name: str) -> dict:
+        """Fetch secret scanning and push protection status for a repo."""
+        try:
+            resp = httpx.get(
+                f"{self.BASE_URL}/repos/{repo_full_name}",
+                headers=self.headers,
+                timeout=10,
+            )
+            resp.raise_for_status()
+            repo = resp.json()
+            security = repo.get("security_and_analysis", {}) or {}
+            return {
+                "secret_scanning": security.get("secret_scanning", {}).get("status") == "enabled",
+                "secret_scanning_push_protection": security.get("secret_scanning_push_protection", {}).get("status") == "enabled",
+            }
+        except Exception as e:
+            logger.warning(f"Failed to fetch security settings for {repo_full_name}: {e}")
+            return {"secret_scanning": False, "secret_scanning_push_protection": False}
