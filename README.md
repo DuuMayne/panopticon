@@ -6,6 +6,12 @@ Security control monitoring service. Continuously evaluates critical security an
 
 This is not a GRC platform. It is a narrow, engineer-friendly monitoring and evidence system for high-value controls.
 
+## Why This Exists
+
+Most compliance programs treat control monitoring as a point-in-time exercise: an auditor asks "is MFA enforced?" and someone screenshots the Okta policy page. That evidence is stale the moment it's captured. Between audits, controls drift — someone disables branch protection for a hotfix and forgets to re-enable it, an IAM key ages past rotation policy, a new S3 bucket gets created without encryption.
+
+PANOPTICON was built by a GRC practitioner who wanted continuous proof instead of periodic posture claims. It runs the same checks an auditor would run, on a schedule, and stores the results with timestamps and evidence. When the auditor asks "was this control in place all quarter?", the answer is a time-series of pass/fail results with evidence snapshots — not a screenshot from last Tuesday.
+
 ## Controls
 
 | Control | Connector | What it checks | Compliance |
@@ -414,6 +420,12 @@ Slack alerts fire on:
 
 Configure via `SLACK_WEBHOOK_URL`. Leave empty to disable.
 
+## Development
+
+Designed, spec'd, and directed by a security/compliance practitioner. AI-assisted implementation using [Claude Code](https://claude.ai/code).
+
+The control definitions, evaluator logic, compliance mappings, and alerting thresholds come from real-world audit experience. The architecture — separating connectors (data fetching) from evaluators (pass/fail logic) — exists because that's how you make controls testable and auditable. The implementation was accelerated with AI tooling, but the design decisions reflect what actually matters when an auditor is sitting across the table from you.
+
 ## License
 
-Apache 2.0
+Apache 2.0 with Commons Clause — see [LICENSE](LICENSE).
