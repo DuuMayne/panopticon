@@ -8,7 +8,7 @@ import logging
 from app.database import SessionLocal
 from app.models import Control, ControlCurrentState
 
-logger = logging.getLogger("panopticon.seed")
+logger = logging.getLogger("oculus.seed")
 
 CONTROLS = [
     {

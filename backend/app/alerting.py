@@ -6,7 +6,7 @@ import httpx
 
 from app.config import settings
 
-logger = logging.getLogger("panopticon.alerting")
+logger = logging.getLogger("oculus.alerting")
 
 
 def send_slack_alert(message: str, control_name: str, status: str) -> None:
@@ -24,7 +24,7 @@ def send_slack_alert(message: str, control_name: str, status: str) -> None:
                 "blocks": [
                     {
                         "type": "section",
-                        "text": {"type": "mrkdwn", "text": f"*PANOPTICON Alert*\n*Control:* {control_name}\n{message}"},
+                        "text": {"type": "mrkdwn", "text": f"*OCULUS Alert*\n*Control:* {control_name}\n{message}"},
                     }
                 ],
             }

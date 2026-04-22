@@ -1,4 +1,6 @@
-# PANOPTICON
+# OCULUS
+
+*Operational Control Unified Logic & Uniform Scoring*
 
 *Proof > Posture*
 
@@ -10,7 +12,7 @@ This is not a GRC platform. It is a narrow, engineer-friendly monitoring and evi
 
 Most compliance programs treat control monitoring as a point-in-time exercise: an auditor asks "is MFA enforced?" and someone screenshots the Okta policy page. That evidence is stale the moment it's captured. Between audits, controls drift — someone disables branch protection for a hotfix and forgets to re-enable it, an IAM key ages past rotation policy, a new S3 bucket gets created without encryption.
 
-PANOPTICON was built by a GRC practitioner who wanted continuous proof instead of periodic posture claims. It runs the same checks an auditor would run, on a schedule, and stores the results with timestamps and evidence. When the auditor asks "was this control in place all quarter?", the answer is a time-series of pass/fail results with evidence snapshots — not a screenshot from last Tuesday.
+OCULUS was built by a GRC practitioner who wanted continuous proof instead of periodic posture claims. It runs the same checks an auditor would run, on a schedule, and stores the results with timestamps and evidence. When the auditor asks "was this control in place all quarter?", the answer is a time-series of pass/fail results with evidence snapshots — not a screenshot from last Tuesday.
 
 ## Controls
 
@@ -44,14 +46,14 @@ Requires Python 3.12+, Node.js 20+, and Postgres.
 
 ```bash
 # 1. Database
-createdb panopticon
-psql -c "CREATE USER panopticon WITH PASSWORD 'panopticon'; GRANT ALL ON DATABASE panopticon TO panopticon;"
+createdb oculus
+psql -c "CREATE USER oculus WITH PASSWORD 'oculus'; GRANT ALL ON DATABASE oculus TO oculus;"
 
 # 2. Backend
 cd backend
 python3.12 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-export DATABASE_URL=postgresql://panopticon:panopticon@localhost:5432/panopticon
+export DATABASE_URL=postgresql://oculus:oculus@localhost:5432/oculus
 alembic upgrade head
 python -m app.seed
 uvicorn app.main:app --reload --port 8000
@@ -125,7 +127,7 @@ import httpx
 from app.config import settings
 from app.connectors.base import ConnectorBase, register_connector
 
-logger = logging.getLogger("panopticon.connectors.jira")
+logger = logging.getLogger("oculus.connectors.jira")
 
 @register_connector
 class JiraConnector(ConnectorBase):

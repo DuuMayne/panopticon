@@ -2,7 +2,7 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    database_url: str = "postgresql://panopticon:panopticon@db:5432/panopticon"
+    database_url: str = "postgresql://oculus:oculus@db:5432/oculus"
 
     # Connectors
     okta_domain: str = ""

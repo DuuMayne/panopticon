@@ -7,7 +7,7 @@ import httpx
 from app.config import settings
 from app.connectors.base import ConnectorBase, register_connector
 
-logger = logging.getLogger("panopticon.connectors.github")
+logger = logging.getLogger("oculus.connectors.github")
 
 
 @register_connector

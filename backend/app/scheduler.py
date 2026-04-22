@@ -11,7 +11,7 @@ from app.models import Control, ControlRun, ControlFailure, ControlCurrentState
 from app.evaluators.registry import get_evaluator, get_connector
 from app.alerting import check_and_alert
 
-logger = logging.getLogger("panopticon.scheduler")
+logger = logging.getLogger("oculus.scheduler")
 
 _scheduler = None  # type: Optional[BackgroundScheduler]
 _last_heartbeat = None  # type: Optional[datetime]

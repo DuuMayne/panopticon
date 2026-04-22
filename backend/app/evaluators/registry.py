@@ -19,7 +19,7 @@ from app.config import settings
 # Ensure all connectors are imported and registered
 import app.connectors  # noqa: F401
 
-logger = logging.getLogger("panopticon.registry")
+logger = logging.getLogger("oculus.registry")
 
 EVALUATOR_REGISTRY: dict[str, type[EvaluatorBase]] = {
     "mfa_enforced": MfaEnforcedEvaluator,

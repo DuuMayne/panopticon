@@ -8,7 +8,7 @@ from botocore.exceptions import ClientError
 from app.config import settings
 from app.connectors.base import ConnectorBase, register_connector
 
-logger = logging.getLogger("panopticon.connectors.aws_s3")
+logger = logging.getLogger("oculus.connectors.aws_s3")
 
 
 @register_connector

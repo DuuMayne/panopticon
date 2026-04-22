@@ -8,7 +8,7 @@ from botocore.exceptions import ClientError, NoCredentialsError
 from app.config import settings
 from app.connectors.base import ConnectorBase, register_connector
 
-logger = logging.getLogger("panopticon.connectors.aws")
+logger = logging.getLogger("oculus.connectors.aws")
 
 
 @register_connector
@@ -22,7 +22,7 @@ class AWSConnector(ConnectorBase):
     Expected config_json:
     {
         "production_accounts": [
-            {"account_id": "123456789012", "role_arn": "arn:aws:iam::123456789012:role/PanopticonAudit"}
+            {"account_id": "123456789012", "role_arn": "arn:aws:iam::123456789012:role/OculusAudit"}
         ]
     }
     Or simple list of account IDs (uses default credentials):
@@ -148,7 +148,7 @@ class AWSConnector(ConnectorBase):
         sts = boto3.client("sts", region_name=settings.aws_default_region)
         creds = sts.assume_role(
             RoleArn=role_arn,
-            RoleSessionName="panopticon-audit",
+            RoleSessionName="oculus-audit",
             DurationSeconds=900,
         )["Credentials"]
 

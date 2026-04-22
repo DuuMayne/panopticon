@@ -2,15 +2,15 @@ services:
   db:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: panopticon
-      POSTGRES_PASSWORD: panopticon
-      POSTGRES_DB: panopticon
+      POSTGRES_USER: oculus
+      POSTGRES_PASSWORD: oculus
+      POSTGRES_DB: oculus
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U panopticon"]
+      test: ["CMD-SHELL", "pg_isready -U oculus"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -21,7 +21,7 @@ services:
       - "8000:8000"
     env_file: .env
     environment:
-      DATABASE_URL: postgresql://panopticon:panopticon@db:5432/panopticon
+      DATABASE_URL: postgresql://oculus:oculus@db:5432/oculus
     depends_on:
       db:
         condition: service_healthy
